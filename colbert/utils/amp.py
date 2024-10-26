@@ -8,11 +8,13 @@ class MixedPrecisionManager():
     def __init__(self, activated):
         self.activated = activated
 
-        if self.activated:
+        if self.activated and torch.cuda.is_available():      #To handle cuda availability
             self.scaler = torch.cuda.amp.GradScaler()
+        else:
+            self.scaler = None
 
     def context(self):
-        return torch.cuda.amp.autocast() if self.activated else NullContextManager()
+        return torch.amp.autocast('cuda') if self.activated else NullContextManager()         #torch.amp.autocast('cuda') for deprecation warning.
 
     def backward(self, loss):
         if self.activated:
